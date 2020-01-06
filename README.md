@@ -15,6 +15,21 @@ To monitor and control them:
   * Take a look in `logs/`
   * ... or run `supervisorctl`
 
+### It's kind of normal for things to fail (sometimes)
+
+Supervisor doesn't really have a concept of things depending on each other. So 
+we just run them all at once, and retry until they work. Some items are one-shot
+things so you can expect:
+
+ * Items which run once and stop are expected to end in `Exited`
+ * Things should never end in `Fatal`
+ * While services and other build steps are taking place, many things will 
+   restart again and again
+ * Just because something is `Running` doesn't mean it's happy
+   * Many of our items are separately managing tasks (which could be failing)
+   * Look at the uptime or logs to see things are actually ok
+ 
+
 Using this in development
 -------------------------
 
