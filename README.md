@@ -1,13 +1,27 @@
 # h-supervisor-dev
 
-A development environment for Hypothesis based on supervisord
+A development environment for Hypothesis based on Supervisor
 
 Usage
 -----
 
-TODO: Use this section to explain how someone would use your package in their project.
-For example: how to add the package to a project as a requirement, how to configure the
-package, how to initialize the package, and how to call it.
+To start the services:
+
+  * `make dev`
+
+To monitor and control them:
+
+  * Use the web-interface at http://localhost:9001
+  * ... or run `supervisorctl`
+
+Caveats
+-------
+
+ * H dev services have a tendency to stay up when stopped and in general are a 
+   pain as a result of being run through honcho, instead of Supervisor
+ * To fix you can try:
+   * Celerybeat: `rm projects/h/celerybeat.pid`
+   * If all else fails reboot or run `make dev` in `h/projects` and debug manually
 
 Hacking
 -------
