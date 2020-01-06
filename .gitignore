@@ -5,7 +5,7 @@
 .idea
 
 projects/*
-logs/*
+logs/**/*.log
 
 build/
 dist/
