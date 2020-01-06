@@ -1,0 +1,14 @@
+{
+    "project_name": "Hypothesis Supervisor Runner",
+    "description": "A development environment for Hypothesis based on supervisord",
+    "project_slug": "h-supervisor-dev",
+    "pkg_name": "h_supervisor_dev",
+    "options": {
+        "disable_replay": [
+            "README.md",
+            "setup.cfg",
+            "src/h_supervisor_dev/__init__.py"
+        ]
+    },
+    "_template": "gh:hypothesis/h-cookiecutter-pypackage"
+}

@@ -1,0 +1,25 @@
+{
+    "h": {
+        "git_url": "git@github.com:hypothesis/h.git",
+        "services": [
+          "h_postgres_1",
+          "h_rabbit_1",
+          "h_elastic_search_1"
+        ]
+    },
+    "lms": {
+        "git_url": "git@github.com:hypothesis/lms.git",
+        "services": [
+            "lms_postgres_1"
+        ]
+    },
+    "client": {
+        "git_url": "git@github.com:hypothesis/client.git"
+    },
+    "bouncer": {
+        "git_url": "git@github.com:hypothesis/bouncer.git"
+    },
+    "via": {
+        "git_url": "git@github.com:hypothesis/via.git"
+    }
+}

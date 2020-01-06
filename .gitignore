@@ -1,0 +1,13 @@
+*.pyc
+.coverage
+.coverage.*
+.tox
+.idea
+
+projects/*
+logs/*
+
+build/
+dist/
+*.egg-info/
+.eggs/
