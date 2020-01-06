@@ -1,18 +1,29 @@
 # h-supervisor-dev
 
-A development environment for Hypothesis based on Supervisor
+A complete development environment for Hypothesis based on Supervisor
 
 Usage
 -----
 
 To start the services:
 
-  * `make dev`
+  * `make dev` (slow the first time)
 
 To monitor and control them:
 
   * Use the web-interface at http://localhost:9001
+  * Take a look in `logs/`
   * ... or run `supervisorctl`
+
+Using this in development
+-------------------------
+
+A clean checkout is made of all projects from `master` and all services 
+are started for all projects.
+
+If you want to use locally developed code instead, you should stop the
+relevant services (using the Web UI or `supervisorctl`) and then run your 
+version in their place.
 
 Caveats
 -------
