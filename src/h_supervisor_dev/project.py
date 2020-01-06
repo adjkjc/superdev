@@ -7,11 +7,12 @@ from h_supervisor_dev.shell import Shell, Git
 
 
 class Project:
-    def __init__(self, base_dir, name, git_url, services=None):
+    def __init__(self, base_dir, name, git_url, services=None, tox_init=None):
         self.base_dir = base_dir
         self.name = name
         self.git_location = git_url
         self.services = services
+        self.tox_init = tox_init
 
     @property
     def path(self):
@@ -21,12 +22,33 @@ class Project:
     def is_cloned(self):
         return os.path.exists(self.path)
 
+    def initialise(self):
+        if not self.is_cloned:
+            print(f"Cloning '{self.name}'...")
+            self.clone()
+        else:
+            print(f"Updating '{self.name}'...")
+            self.update()
+
+        if self.tox_init:
+            for env in self.tox_init:
+                print(f"Initialising '{self.name}' tox env '{env}'...")
+                self.tox(env, '"python --version"')
+
     def update(self):
         Git.reset_head(self.path)
         Git.pull(self.path)
 
     def clone(self):
         Git.clone(self.base_dir, self.git_location)
+
+    def tox(self, env, command=None):
+        tox_command = ['tox', '-e', env]
+
+        if command:
+            tox_command.extend(['--run-command', command])
+
+        Shell.run_in_dir(self.path, tox_command)
 
     def make(self, command):
         pyenv_dir = expanduser("~/.pyenv")
@@ -55,16 +77,7 @@ class ProjectManager:
 
     def _prep_project(self, project):
         try:
-            if not project.is_cloned:
-                print(f"Cloning {project.name}")
-                project.clone()
-            else:
-                print(f"Updating {project.name}...")
-                project.update()
-
-            # if project.services:
-            #     print(f"Running services for {project.name}...")
-            #     project.make('services')
+            project.initialise()
 
             print(f"{project.name} complete")
 
