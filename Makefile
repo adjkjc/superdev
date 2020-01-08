@@ -26,7 +26,7 @@ dev: python projects
 
 .PHONY: projects
 projects: python
-	@tox -qe dev --run-command "python go.py"
+	@tox -qe dev --run-command "python bin/initialise_projects.py"
 
 .PHONY: lint
 lint: python
