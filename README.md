@@ -1,4 +1,4 @@
-# h-supervisor-dev
+# superdev
 
 A complete development environment for Hypothesis based on Supervisor
 
@@ -52,7 +52,7 @@ Caveats
 Hacking
 -------
 
-### Installing h-supervisor-dev in a development environment
+### Installing superdev in a development environment
 
 #### You will need
 
@@ -66,16 +66,16 @@ Hacking
 #### Clone the git repo
 
 ```terminal
-git clone https://github.com/hypothesis/h-supervisor-dev.git
+git clone https://github.com/hypothesis/superdev.git
 ```
 
-This will download the code into a `h-supervisor-dev` directory
+This will download the code into a `superdev` directory
 in your current working directory. You need to be in the
-`h-supervisor-dev` directory for the rest of the installation
+`superdev` directory for the rest of the installation
 process:
 
 ```terminal
-cd h-supervisor-dev
+cd superdev
 ```
 
 #### Run the tests
@@ -84,7 +84,7 @@ cd h-supervisor-dev
 make test
 ```
 
-**That's it!** You’ve finished setting up your h-supervisor-dev
+**That's it!** You’ve finished setting up your superdev
 development environment. Run `make help` to see all the commands that're
 available for linting, code formatting, packaging, etc.
 

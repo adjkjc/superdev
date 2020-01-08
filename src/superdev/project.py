@@ -3,7 +3,7 @@ import json
 import pkg_resources
 from os.path import expanduser
 
-from h_supervisor_dev.shell import Shell, Git
+from superdev.shell import Shell, Git
 
 
 class Project:
@@ -67,7 +67,7 @@ class Project:
 class ProjectManager:
     PROJECT_DATA = json.load(
         pkg_resources.resource_stream(
-            'h_supervisor_dev', 'resource/git_projects.json'))
+            'superdev', 'resource/git_projects.json'))
 
     def __init__(self, base_dir):
         self.base_dir = base_dir

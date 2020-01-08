@@ -1,5 +1,5 @@
 import os
-from h_supervisor_dev.project import ProjectManager
+from superdev.project import ProjectManager
 
 
 if __name__ == '__main__':

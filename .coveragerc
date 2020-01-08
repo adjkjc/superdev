@@ -2,7 +2,7 @@
 branch = True
 parallel = True
 source =
-    h_supervisor_dev
+    superdev
     tests/unit
 
 [paths]
