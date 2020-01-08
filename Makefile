@@ -18,7 +18,11 @@ help:
 .PHONY: dev
 dev: python projects
 	@echo "Web interface at: http://localhost:9001"
-	@tox -qe dev
+	# This looks daft, but is required to prevent some strangeness with
+	# the path when running sub-processes which caused them to pick up
+	# tox (and maybe more) from our virtual env, instead of the right
+	# pyenv
+	@.tox/dev/bin/supervisord --nodaemon --configuration conf/supervisord.conf
 
 .PHONY: projects
 projects: python

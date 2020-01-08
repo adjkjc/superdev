@@ -33,7 +33,7 @@ class Project:
         if self.tox_init:
             for env in self.tox_init:
                 print(f"Initialising '{self.name}' tox env '{env}'...")
-                self.tox(env, '"python --version"')
+                self.tox(env, ['--notest'])
 
     def update(self):
         Git.reset_head(self.path)
@@ -42,13 +42,15 @@ class Project:
     def clone(self):
         Git.clone(self.base_dir, self.git_location)
 
-    def tox(self, env, command=None):
-        tox_command = ['tox', '-e', env]
+    def tox(self, tox_env, options=None):
+        tox_command = ['pyenv', 'exec', 'tox', '-e', tox_env]
 
-        if command:
-            tox_command.extend(['--run-command', command])
+        if options:
+            tox_command.extend(options)
 
-        Shell.run_in_dir(self.path, tox_command)
+        Shell.run_in_dir(
+            self.path, tox_command,
+            env=dict(os.environ, PYENV_DIR=os.path.abspath(self.path)))
 
     def make(self, command):
         pyenv_dir = expanduser("~/.pyenv")
@@ -56,10 +58,10 @@ class Project:
         env = dict(os.environ)
         env['PATH'] += f":{pyenv_dir}/shims:{pyenv_dir}/bin"
         env.update({
-            "PYENV_SHELL": "bash",
-            "PYENV_ROOT": pyenv_dir,
+            "PYENV_DIR": os.path.abspath(self.path)
         })
-        Shell.run_in_dir(self.path, ['make', command], env)
+
+        Shell.run_in_dir(self.path, ['make', command], env=env)
 
 
 class ProjectManager:
