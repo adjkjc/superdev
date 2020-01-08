@@ -1,6 +1,6 @@
 import os
-from superdev.project import ProjectManager
 
+from superdev.project import ProjectManager
 
 if __name__ == '__main__':
     project_dir = 'projects'

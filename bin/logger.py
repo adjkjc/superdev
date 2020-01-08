@@ -71,17 +71,17 @@ WIDTH = 20
 
 def main():
     while True:
-        _write('READY\n')
+        _write("READY\n")
         header = _parse_header(sys.stdin.readline())
-        payload = sys.stdin.read(int(header['len']))
+        payload = sys.stdin.read(int(header["len"]))
 
         # Only handle PROCESS_LOG_* events and just ACK anything else.
-        if header['eventname'] == 'PROCESS_LOG_STDOUT':
+        if header["eventname"] == "PROCESS_LOG_STDOUT":
             _log_payload(payload)
-        elif header['eventname'] == 'PROCESS_LOG_STDERR':
+        elif header["eventname"] == "PROCESS_LOG_STDERR":
             _log_payload(payload, err=True)
 
-        _write('RESULT 2\nOK')
+        _write("RESULT 2\nOK")
 
 
 def _write(s):
@@ -90,20 +90,20 @@ def _write(s):
 
 
 def _parse_header(data):
-    return dict([x.split(':') for x in data.split()])
+    return dict([x.split(":") for x in data.split()])
 
 
 def _log_payload(payload, err=False):
-    headerdata, data = payload.split('\n', 1)
+    headerdata, data = payload.split("\n", 1)
     header = _parse_header(headerdata)
-    name = header['processname']
+    name = header["processname"]
     if err:
-        name += ' (stderr)'
-    prefix = '{name:{width}} | '.format(name=name, width=WIDTH)
+        name += " (stderr)"
+    prefix = "{name:{width}} | ".format(name=name, width=WIDTH)
     for line in data.splitlines():
-        sys.stderr.write(prefix + line + '\n')
+        sys.stderr.write(prefix + line + "\n")
     sys.stderr.flush()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

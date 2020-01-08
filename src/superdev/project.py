@@ -1,9 +1,10 @@
-import os
 import json
-import pkg_resources
+import os
 from os.path import expanduser
 
-from superdev.shell import Shell, Git
+import pkg_resources
+
+from superdev.shell import Git, Shell
 
 
 class Project:
@@ -33,7 +34,7 @@ class Project:
         if self.tox_init:
             for env in self.tox_init:
                 print(f"Initialising '{self.name}' tox env '{env}'...")
-                self.tox(env, ['--notest'])
+                self.tox(env, ["--notest"])
 
     def update(self):
         Git.reset_head(self.path)
@@ -43,31 +44,31 @@ class Project:
         Git.clone(self.base_dir, self.git_location)
 
     def tox(self, tox_env, options=None):
-        tox_command = ['pyenv', 'exec', 'tox', '-e', tox_env]
+        tox_command = ["pyenv", "exec", "tox", "-e", tox_env]
 
         if options:
             tox_command.extend(options)
 
         Shell.run_in_dir(
-            self.path, tox_command,
-            env=dict(os.environ, PYENV_DIR=os.path.abspath(self.path)))
+            self.path,
+            tox_command,
+            env=dict(os.environ, PYENV_DIR=os.path.abspath(self.path)),
+        )
 
     def make(self, command):
         pyenv_dir = expanduser("~/.pyenv")
 
         env = dict(os.environ)
-        env['PATH'] += f":{pyenv_dir}/shims:{pyenv_dir}/bin"
-        env.update({
-            "PYENV_DIR": os.path.abspath(self.path)
-        })
+        env["PATH"] += f":{pyenv_dir}/shims:{pyenv_dir}/bin"
+        env.update({"PYENV_DIR": os.path.abspath(self.path)})
 
-        Shell.run_in_dir(self.path, ['make', command], env=env)
+        Shell.run_in_dir(self.path, ["make", command], env=env)
 
 
 class ProjectManager:
     PROJECT_DATA = json.load(
-        pkg_resources.resource_stream(
-            'superdev', 'resource/git_projects.json'))
+        pkg_resources.resource_stream("superdev", "resource/git_projects.json")
+    )
 
     def __init__(self, base_dir):
         self.base_dir = base_dir
