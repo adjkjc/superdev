@@ -57,6 +57,8 @@ class Tox:
         :param tox_env: The tox environment to run in
         :param options: List of options to add to the end of the command
         """
+        # Use pyenv ourselves to avoid just picking up the virtualenv version
+        # of tox from the superdev project
         tox_command = ["pyenv", "exec", "tox", "-e", tox_env]
 
         if options:
@@ -65,6 +67,8 @@ class Tox:
         Shell.run_in_dir(
             base_dir,
             tox_command,
+            # Tell pyenv to look in the target directory to pick up the right
+            # version of python, not our version
             env=dict(os.environ, PYENV_DIR=os.path.abspath(base_dir)),
         )
 

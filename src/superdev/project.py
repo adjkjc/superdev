@@ -113,12 +113,18 @@ class ProjectManager:
 
     def prepare_all(self):
         """Prepare all projects for work, in parallel."""
-        results = self._do_for_projects(self._prep_project)
+
+        # Work on the projects in parallel
+        results = Pool(cpu_count()).map(self._prep_project, self.projects.values())
 
         all_good = self._print_results(results)
 
         if not all_good:
             self._issue_warning_countdown()
+
+    # pylint: disable=no-self-use
+    def _prep_project(self, project):
+        return project.initialise()
 
     @staticmethod
     def _print_results(results):
@@ -156,11 +162,3 @@ class ProjectManager:
                 end="",
             )
             sleep(1)
-
-    def _do_for_projects(self, function):
-        pool = Pool(cpu_count())
-        return pool.map(function, self.projects.values())
-
-    # pylint: disable=no-self-use
-    def _prep_project(self, project):
-        return project.initialise()
