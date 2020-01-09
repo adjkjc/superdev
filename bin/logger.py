@@ -42,13 +42,13 @@ And here's an example of the output you might see from supervisord:
     2017-01-24 17:25:03,907 INFO spawned: 'logger' with pid 15439
     2017-01-24 17:25:03,910 INFO spawned: 'web' with pid 15440
     2017-01-24 17:25:03,913 INFO spawned: 'worker' with pid 15441
-    2017-01-24 17:25:05,216 INFO success: logger entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-    2017-01-24 17:25:05,217 INFO success: web entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-    2017-01-24 17:25:05,217 INFO success: worker entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-    web:ERR | 2017-01-24 17:25:04,203 [15440] [gunicorn.error:INFO] Starting gunicorn 19.6.0
-    web:ERR | 2017-01-24 17:25:04,205 [15440] [gunicorn.error:INFO] Listening at: http://127.0.0.1:5000 (15440)
-    web:ERR | 2017-01-24 17:25:04,206 [15440] [gunicorn.error:INFO] Using worker: sync
-    web:ERR | 2017-01-24 17:25:04,211 [15449] [gunicorn.error:INFO] Booting worker with pid: 15449
+    2017-01-24 17:25:05,216 INFO success: logger entered RUNNING state, pro...
+    2017-01-24 17:25:05,217 INFO success: web entered RUNNING state, proces...
+    2017-01-24 17:25:05,217 INFO success: worker entered RUNNING state, pro...
+    web:ERR | 2017-01-24 17:25:04,203 [15440] [gunicorn.error:INFO] Startin...
+    web:ERR | 2017-01-24 17:25:04,205 [15440] [gunicorn.error:INFO] Listeni...
+    web:ERR | 2017-01-24 17:25:04,206 [15440] [gunicorn.error:INFO] Using w...
+    web:ERR | 2017-01-24 17:25:04,211 [15449] [gunicorn.error:INFO] Booting...
     worker  |
     worker  |  -------------- celery@mahler.local v3.1.25 (Cipater)
     worker  | ---- **** -----
@@ -66,50 +66,53 @@ aggregated output to a single file.
 
 import sys
 
-width = 0
 
+class StderrRedirect:  # pylint: disable=too-few-public-methods
+    """Respond to log events by re-logging them all to STDOUT."""
 
-def main():
-    while True:
-        _write("READY\n")
-        header = _parse_header(sys.stdin.readline())
-        payload = sys.stdin.read(int(header["len"]))
+    width = 0
 
-        # Only handle PROCESS_LOG_* events and just ACK anything else.
-        if header["eventname"] == "PROCESS_LOG_STDOUT":
-            _log_payload(payload)
+    def main_loop(self):
+        """Run the main loop."""
 
-        elif header["eventname"] == "PROCESS_LOG_STDERR":
-            _log_payload(payload, err=True)
+        while True:
+            self._write("READY\n")
+            header = self._parse_header(sys.stdin.readline())
+            payload = sys.stdin.read(int(header["len"]))
 
-        _write("RESULT 2\nOK")
+            # Only handle PROCESS_LOG_* events and just ACK anything else.
+            if header["eventname"] == "PROCESS_LOG_STDOUT":
+                self._log_payload(payload)
 
+            elif header["eventname"] == "PROCESS_LOG_STDERR":
+                self._log_payload(payload, err=True)
 
-def _write(s):
-    sys.stdout.write(s)
-    sys.stdout.flush()
+            self._write("RESULT 2\nOK")
 
+    @staticmethod
+    def _write(message):
+        sys.stdout.write(message)
+        sys.stdout.flush()
 
-def _parse_header(data):
-    return dict([x.split(":") for x in data.split()])
+    @staticmethod
+    def _parse_header(data):
+        return dict([x.split(":") for x in data.split()])
 
+    def _log_payload(self, payload, err=False):
+        headerdata, data = payload.split("\n", 1)
+        header = self._parse_header(headerdata)
 
-def _log_payload(payload, err=False):
-    global width
-    headerdata, data = payload.split("\n", 1)
-    header = _parse_header(headerdata)
+        name = header["processname"] + (":ERR" if err else "")
 
-    name = header["processname"] + (":ERR" if err else "")
+        self.width = max(len(name), self.width)
 
-    width = max(len(name), width)
+        prefix = name.ljust(self.width) + " | "
 
-    prefix = name.ljust(width) + " | "
+        for line in data.splitlines():
+            sys.stderr.write(prefix + line + "\n")
 
-    for line in data.splitlines():
-        sys.stderr.write(prefix + line + "\n")
-
-    sys.stderr.flush()
+        sys.stderr.flush()
 
 
 if __name__ == "__main__":
-    main()
+    StderrRedirect().main_loop()

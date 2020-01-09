@@ -1,11 +1,13 @@
+"""Initialise all of the projects."""
+
 import os
 
 from superdev.project import ProjectManager
 
+PROJECT_DIR = "../"
+
 if __name__ == "__main__":
-    project_dir = "../"
+    if not os.path.isdir(PROJECT_DIR):
+        os.mkdir(PROJECT_DIR)
 
-    if not os.path.isdir(project_dir):
-        os.mkdir(project_dir)
-
-    ProjectManager(project_dir).prepare_all()
+    ProjectManager(PROJECT_DIR).prepare_all()
