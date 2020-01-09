@@ -1,6 +1,7 @@
 .PHONY: help
 help:
 	@echo "make dev               Run the development services"
+	@echo "make control           Drop into an interactive shell to manage services"
 	@echo "make help              Show this help message"
 	@echo "make lint              Code quality analysis (pylint)"
 	@echo "make format            Correctly format the code"
@@ -23,6 +24,11 @@ dev: python projects
 	# tox (and maybe more) from our virtual env, instead of the right
 	# pyenv
 	@.tox/dev/bin/supervisord --nodaemon --configuration conf/supervisord.conf
+
+.PHONY: control
+control:
+	@tox -qe dev --run-command supervisorctl
+
 
 .PHONY: projects
 projects: python
