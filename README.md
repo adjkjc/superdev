@@ -33,18 +33,20 @@ things so you can expect:
 Using this in development
 -------------------------
 
-A clean checkout is made of all projects from `master` and all services 
-are started for all projects.
+Superdev will use the projects next to it in it's parent directory. It will
+also attempt to keep them up to date:
 
-If you want to use locally developed code instead, you should stop the
-relevant services (using the Web UI or `supervisorctl`) and then run your 
-version in their place.
+ * If a project is missing it will check it out
+ * If a project is clean (no uncommitted files or changes) it will fast forward
+ * Otherwise it will give up and just try and use what is there
+
+If you want to run a version of a particular service yourself, then you should
+stop the supervisor version before starting up your own.
 
 Caveats
 -------
 
- * H dev services have a tendency to stay up when stopped and in general are a 
-   pain as a result of being run through honcho, instead of Supervisor
+ * H dev services get themselves a bit broken sometimes
  * To fix you can try:
    * Celerybeat: `rm projects/h/celerybeat.pid`
    * If all else fails reboot or run `make dev` in `h/projects` and debug manually
