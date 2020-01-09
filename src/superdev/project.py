@@ -1,10 +1,12 @@
 import json
 import os
 from os.path import expanduser
+from time import sleep
 
 import pkg_resources
+from colorama import Fore, Style, init
 
-from superdev.shell import Git, Shell
+from superdev.shell import Git, GitException, Shell
 
 
 class Project:
@@ -23,22 +25,49 @@ class Project:
     def is_cloned(self):
         return os.path.exists(self.path)
 
+    def _report(self, string):
+        print(f"[{self.name}]".ljust(10) + " " + string)
+
     def initialise(self):
-        if not self.is_cloned:
-            print(f"Cloning '{self.name}'...")
-            self.clone()
-        else:
-            print(f"Updating '{self.name}'...")
-            self.update()
+        try:
+            if not self.is_cloned:
+                self._report("Cloning...")
+                self.clone()
+                status = True, "Cloned"
 
-        if self.tox_init:
-            for env in self.tox_init:
-                print(f"Initialising '{self.name}' tox env '{env}'...")
-                self.tox(env, ["--notest"])
+            elif Git.is_clean(self.path):
+                self._report("Updating...")
+                try:
+                    Git.fast_forward(self.path)
+                    status = True, "Updated"
+                except GitException:
+                    self._report("UPDATE FAILED, CANNOT FAST FORWARD (skipping update)")
+                    status = False, "Could not fast-forward"
 
-    def update(self):
-        Git.reset_head(self.path)
-        Git.pull(self.path)
+            else:
+                self._report("UNCOMMITTED CHANGES (skipping update)")
+                status = False, "Uncommitted changes"
+
+            try:
+                if self.tox_init:
+                    for env in self.tox_init:
+                        self._report("Initialising tox env '{env}'...")
+                        self.tox(env, ["--notest"])
+            except Exception:
+                status = False, f"Tox prep failed for '{env}'"
+
+            self._report("Complete")
+
+        except Exception as e:
+            self._report("Failed with error: {e}")
+            status = False, "Unhandled exception"
+
+        try:
+            branch = Git.get_branch(self.path)
+        except Exception:
+            branch = "?????"
+
+        return self.name, status, branch
 
     def clone(self):
         Git.clone(self.base_dir, self.git_location)
@@ -78,21 +107,47 @@ class ProjectManager:
             for name, data in self.PROJECT_DATA.items()
         }
 
-    def _prep_project(self, project):
-        try:
-            project.initialise()
+    def prepare_all(self):
+        results = self._do_for_projects(self._prep_project)
 
-            print(f"{project.name} complete")
+        init()
 
-        except Exception as e:
-            print(f"Failed {project.name} with error: {e}")
-            raise
+        all_good = True
+
+        print()
+
+        for project, (ok, status), branch in results:
+            output = project.ljust(10)
+            branch_string = f"({branch})".ljust(20)
+
+            if branch == "master":
+                output += branch_string
+            else:
+                output += f"{Fore.YELLOW}{branch_string}{Style.RESET_ALL}"
+
+            if ok:
+                output += f" {Fore.GREEN} OK: {status}"
+            else:
+                all_good = False
+                output += f" {Fore.RED}ERR: {status}"
+
+            print(output + Style.RESET_ALL)
+
+        print()
+
+        if not all_good:
+            for sec in range(5, 0, -1):
+                print(
+                    f"{Fore.RED}Something above isn't right.{Style.RESET_ALL} Pausing {sec} \r",
+                    end="",
+                )
+                sleep(1)
 
     def _do_for_projects(self, function):
         from multiprocessing import Pool, cpu_count
 
         pool = Pool(cpu_count())
-        pool.map(function, self.projects.values())
+        return pool.map(function, self.projects.values())
 
-    def prepare_all(self):
-        return self._do_for_projects(self._prep_project)
+    def _prep_project(self, project):
+        return project.initialise()

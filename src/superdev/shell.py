@@ -1,6 +1,6 @@
 import os
 from contextlib import contextmanager
-from subprocess import check_output
+from subprocess import CalledProcessError, check_output
 
 
 class Shell:
@@ -21,6 +21,10 @@ class Shell:
             return check_output(" ".join(commands), shell=True, env=env)
 
 
+class GitException(ChildProcessError):
+    pass
+
+
 class Git:
     @classmethod
     def clone(cls, base_dir, git_location):
@@ -31,9 +35,20 @@ class Git:
         return Shell.run_in_dir(base_dir, ["git", "checkout", branch])
 
     @classmethod
-    def pull(cls, base_dir):
-        return Shell.run_in_dir(base_dir, ["git", "pull"])
+    def fast_forward(cls, base_dir):
+        try:
+            return Shell.run_in_dir(base_dir, ["git", "pull", "--ff-only"])
+        except CalledProcessError as e:
+            raise GitException(*e.args) from e
 
     @classmethod
-    def reset_head(cls, base_dir):
-        return Shell.run_in_dir(base_dir, ["git", "reset", "HEAD", "--hard"])
+    def is_clean(cls, base_dir):
+        return not Shell.run_in_dir(base_dir, ["git", "status", "--porcelain"])
+
+    @classmethod
+    def get_branch(cls, base_dir):
+        branch = Shell.run_in_dir(
+            base_dir, ["git", "rev-parse", "--abbrev-ref", "HEAD"]
+        )
+
+        return branch.decode("utf-8").strip()
