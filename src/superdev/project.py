@@ -40,6 +40,7 @@ class Project:
                 try:
                     Git.fast_forward(self.path)
                     status = True, "Updated"
+
                 except GitException:
                     self._report("UPDATE FAILED, CANNOT FAST FORWARD (skipping update)")
                     status = False, "Could not fast-forward"
@@ -51,23 +52,25 @@ class Project:
             try:
                 if self.tox_init:
                     for env in self.tox_init:
-                        self._report("Initialising tox env '{env}'...")
+                        self._report(f"Initialising tox env '{env}'...")
                         self.tox(env, ["--notest"])
+
             except Exception:
                 status = False, f"Tox prep failed for '{env}'"
 
             self._report("Complete")
 
         except Exception as e:
-            self._report("Failed with error: {e}")
+            self._report(f"Failed with error: {e}")
             status = False, "Unhandled exception"
 
-        try:
-            branch = Git.get_branch(self.path)
-        except Exception:
-            branch = "?????"
+        return self.name, status, self._get_branch()
 
-        return self.name, status, branch
+    def _get_branch(self):
+        try:
+            return Git.get_branch(self.path)
+        except Exception:
+            return "?????"
 
     def clone(self):
         Git.clone(self.base_dir, self.git_location)
@@ -110,15 +113,21 @@ class ProjectManager:
     def prepare_all(self):
         results = self._do_for_projects(self._prep_project)
 
-        init()
+        all_good = self._print_results(results)
+
+        if not all_good:
+            self._issue_warning_countdown()
+
+    @staticmethod
+    def _print_results(results):
+        init()  # Initialise colourisation
+        print()
 
         all_good = True
 
-        print()
-
         for project, (ok, status), branch in results:
             output = project.ljust(10)
-            branch_string = f"({branch})".ljust(20)
+            branch_string = f"({branch})".ljust(30)
 
             if branch == "master":
                 output += branch_string
@@ -128,20 +137,23 @@ class ProjectManager:
             if ok:
                 output += f" {Fore.GREEN} OK: {status}"
             else:
-                all_good = False
                 output += f" {Fore.RED}ERR: {status}"
+                all_good = False
 
             print(output + Style.RESET_ALL)
 
         print()
 
-        if not all_good:
-            for sec in range(5, 0, -1):
-                print(
-                    f"{Fore.RED}Something above isn't right.{Style.RESET_ALL} Pausing {sec} \r",
-                    end="",
-                )
-                sleep(1)
+        return all_good
+
+    @staticmethod
+    def _issue_warning_countdown():
+        for sec in range(10, 0, -1):
+            print(
+                f"{Fore.RED}Something above isn't right.{Style.RESET_ALL} Pausing {sec} \r",
+                end="",
+            )
+            sleep(1)
 
     def _do_for_projects(self, function):
         from multiprocessing import Pool, cpu_count
