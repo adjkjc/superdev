@@ -45,14 +45,14 @@ And here's an example of the output you might see from supervisord:
     2017-01-24 17:25:05,216 INFO success: logger entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
     2017-01-24 17:25:05,217 INFO success: web entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
     2017-01-24 17:25:05,217 INFO success: worker entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
-    web (stderr)         | 2017-01-24 17:25:04,203 [15440] [gunicorn.error:INFO] Starting gunicorn 19.6.0
-    web (stderr)         | 2017-01-24 17:25:04,205 [15440] [gunicorn.error:INFO] Listening at: http://127.0.0.1:5000 (15440)
-    web (stderr)         | 2017-01-24 17:25:04,206 [15440] [gunicorn.error:INFO] Using worker: sync
-    web (stderr)         | 2017-01-24 17:25:04,211 [15449] [gunicorn.error:INFO] Booting worker with pid: 15449
-    worker               |
-    worker               |  -------------- celery@mahler.local v3.1.25 (Cipater)
-    worker               | ---- **** -----
-    worker               | --- * ***  * -- Darwin-16.3.0-x86_64-i386-64bit
+    web:ERR | 2017-01-24 17:25:04,203 [15440] [gunicorn.error:INFO] Starting gunicorn 19.6.0
+    web:ERR | 2017-01-24 17:25:04,205 [15440] [gunicorn.error:INFO] Listening at: http://127.0.0.1:5000 (15440)
+    web:ERR | 2017-01-24 17:25:04,206 [15440] [gunicorn.error:INFO] Using worker: sync
+    web:ERR | 2017-01-24 17:25:04,211 [15449] [gunicorn.error:INFO] Booting worker with pid: 15449
+    worker  |
+    worker  |  -------------- celery@mahler.local v3.1.25 (Cipater)
+    worker  | ---- **** -----
+    worker  | --- * ***  * -- Darwin-16.3.0-x86_64-i386-64bit
     ...
 
 Note that in the configuration above we disable the logfiles for the
@@ -66,7 +66,7 @@ aggregated output to a single file.
 
 import sys
 
-WIDTH = 20
+width = 0
 
 
 def main():
@@ -78,6 +78,7 @@ def main():
         # Only handle PROCESS_LOG_* events and just ACK anything else.
         if header["eventname"] == "PROCESS_LOG_STDOUT":
             _log_payload(payload)
+
         elif header["eventname"] == "PROCESS_LOG_STDERR":
             _log_payload(payload, err=True)
 
@@ -94,14 +95,19 @@ def _parse_header(data):
 
 
 def _log_payload(payload, err=False):
+    global width
     headerdata, data = payload.split("\n", 1)
     header = _parse_header(headerdata)
-    name = header["processname"]
-    if err:
-        name += " (stderr)"
-    prefix = "{name:{width}} | ".format(name=name, width=WIDTH)
+
+    name = header["processname"] + (":ERR" if err else "")
+
+    width = max(len(name), width)
+
+    prefix = name.ljust(width) + " | "
+
     for line in data.splitlines():
         sys.stderr.write(prefix + line + "\n")
+
     sys.stderr.flush()
 
 
