@@ -85,7 +85,7 @@ class Git:
         :param git_location: The git URL to clone
         :return: Git command output
         """
-        return cls._git(base_dir, "clone", git_location)
+        return Shell.run_in_dir(base_dir, ["git", "clone", git_location])
 
     @classmethod
     def checkout(cls, base_dir, branch="master"):
@@ -95,7 +95,7 @@ class Git:
         :param branch: The branch to checkout
         :return: Git command output
         """
-        return cls._git(base_dir, "checkout", branch)
+        return Shell.run_in_dir(base_dir, ["git", "checkout", branch])
 
     @classmethod
     def fast_forward(cls, base_dir):
@@ -104,7 +104,7 @@ class Git:
         :param base_dir: The directory to run the command in
         :return: Git command output
         """
-        return cls._git(base_dir, "pull", "--ff-only")
+        return Shell.run_in_dir(base_dir, ["git", "pull", "--ff-only"])
 
     @classmethod
     def is_clean(cls, base_dir):
@@ -115,7 +115,7 @@ class Git:
         :param base_dir: The directory to run the command in
         :return: Git command output
         """
-        return not cls._git(base_dir, "status", "--porcelain")
+        return not Shell.run_in_dir(base_dir, ["git", "status", "--porcelain"])
 
     @classmethod
     def get_branch(cls, base_dir):
@@ -126,14 +126,7 @@ class Git:
         """
 
         return (
-            cls._git(base_dir, "rev-parse", "--abbrev-ref", "HEAD")
+            Shell.run_in_dir(base_dir, ["git", "rev-parse", "--abbrev-ref", "HEAD"])
             .decode("utf-8")
             .strip()
         )
-
-    @classmethod
-    def _git(cls, base_dir, *args):
-        command = ["git"]
-        command.extend(args)
-
-        return Shell.run_in_dir(base_dir, command)
