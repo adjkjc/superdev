@@ -11,9 +11,10 @@ To start the services:
 
 To monitor and control them:
 
-  * Use the web-interface at http://localhost:9001
-  * Take a look in `logs/`
-  * ... or run `supervisorctl`
+  * http://localhost:9001 - Web UI to control services and view logs
+  * `make control` - Control services on the command line
+  * `make monitor` - Monitor services on the command line
+  * 'ls logs/` - Have a look at process logs
 
 ### It's kind of normal for things to fail (sometimes)
 
