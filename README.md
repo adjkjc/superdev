@@ -14,7 +14,7 @@ To monitor and control them:
   * http://localhost:9001 - Web UI to control services and view logs
   * `make control` - Control services on the command line
   * `make monitor` - Monitor services on the command line
-  * 'ls logs/` - Have a look at process logs
+  * `ls logs/` - Have a look at process logs
 
 ### It's kind of normal for things to fail (sometimes)
 
