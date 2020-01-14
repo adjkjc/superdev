@@ -2,6 +2,7 @@
 help:
 	@echo "make dev               Run the development services"
 	@echo "make control           Drop into an interactive shell to manage services"
+	@echo "make monitor           Display basic information about running services"
 	@echo "make help              Show this help message"
 	@echo "make lint              Code quality analysis (pylint)"
 	@echo "make format            Correctly format the code"
@@ -29,6 +30,9 @@ dev: python projects
 control:
 	@tox -qe dev --run-command supervisorctl
 
+.PHONY: monitor
+monitor:
+	@watch --color -n 5 ./bin/monitor
 
 .PHONY: projects
 projects: python

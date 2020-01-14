@@ -1,0 +1,9 @@
+# Fields in this file are: Service name, portnum/protocol, open-frequency, optional comments
+
+client      3000/tcp	0.0
+h-client    3001/tcp	0.0
+h           5000/tcp	0.0
+h-websocket 5001/tcp    0.0
+bouncer     8000/tcp    0.0
+lms-web	    8001/tcp	0.0
+via         9080/tcp    0.0

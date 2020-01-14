@@ -1,0 +1,17 @@
+#!/bin/sh
+
+BOLD=$(tput bold)
+NORMAL="\033[0m"
+
+echo "${BOLD}Services${NORMAL}\n"
+
+nmap --datadir conf/ localhost | \
+    grep -E "PORT|tcp" | \
+    grep --color=always -E "closed|$" | \
+    GREP_COLOR='01;32' grep --color=always -E "open|$"
+
+echo "\n${BOLD}Docker containers${NORMAL}\n"
+
+docker ps -a --format "table {{.Names}}\\t{{.Image}}\\t{{.Status}}" | \
+  grep --color=always -E "Exited|$" | \
+  GREP_COLOR='01;32' grep --color=always -E "Up|$"
