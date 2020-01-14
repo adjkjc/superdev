@@ -4,8 +4,8 @@ BOLD=$(tput bold)
 NORMAL="\033[0m"
 
 RED='01;31'
+AMBER='01;33'
 GREEN='01;32'
-ORANGE='01;33'
 
 SUPERVISORCTL=.tox/dev/bin/supervisorctl
 DOCKER_FORMAT="table {{.Names}}\\t{{.Image}}\\t{{.Status}}"
@@ -15,31 +15,34 @@ highlight() {
     GREP_COLOR=$1 grep --color=always -E "$2|$"
 }
 
+boldly() {
+    echo "${BOLD}$1${NORMAL}\n"
+}
+
+rag() {
+    highlight $RED $1 | highlight $AMBER $2 | highlight $GREEN $3
+}
+
 #-------------------------------------------
 
-echo "${BOLD}Services${NORMAL}\n"
+boldly "Services"
 
-nmap --datadir conf/ localhost | \
-    grep -E "PORT|tcp" | highlight $RED closed | highlight $GREEN open
+nmap --datadir conf/ localhost | grep -E "PORT|tcp" | rag "closed" "filtered" "open"
 
 #-------------------------------------------
 
-echo "\n${BOLD}Docker containers${NORMAL}\n"
+boldly "\nDocker containers"
 
 docker ps -a --format "$DOCKER_FORMAT" --filter name="$DOCKER_CONTAINERS" | \
-    highlight $RED Exited | \
-    highlight $GREEN Up
+    rag "Exited" "" "Up"
 
 #-------------------------------------------
 
-echo "\n${BOLD}Supervisor processes${NORMAL}\n"
+boldly "\nSupervisor processes"
 
 if [ -e $SUPERVISORCTL ]
 then
-    $SUPERVISORCTL status | \
-        highlight $RED "FATAL|refused connection" | \
-        highlight $ORANGE "EXITED|STARTING" | highlight $GREEN RUNNING
-
+    $SUPERVISORCTL status | rag "FATAL|refused connection" "EXITED|STARTING" "RUNNING"
 else
     echo "No tox environment. Run make dev"
 fi
