@@ -2,6 +2,10 @@
 
 BOLD=$(tput bold)
 NORMAL="\033[0m"
+SUPERVISORCTL=.tox/dev/bin/supervisorctl
+DOCKER_FORMAT="table {{.Names}}\\t{{.Image}}\\t{{.Status}}"
+
+#-------------------------------------------
 
 echo "${BOLD}Services${NORMAL}\n"
 
@@ -10,8 +14,24 @@ nmap --datadir conf/ localhost | \
     grep --color=always -E "closed|$" | \
     GREP_COLOR='01;32' grep --color=always -E "open|$"
 
+#-------------------------------------------
+
 echo "\n${BOLD}Docker containers${NORMAL}\n"
 
-docker ps --format "table {{.Names}}\\t{{.Image}}\\t{{.Status}}" | \
+docker ps --format "$DOCKER_FORMAT" | \
   grep --color=always -E "Exited|$" | \
   GREP_COLOR='01;32' grep --color=always -E "Up|$"
+
+#-------------------------------------------
+
+echo "\n${BOLD}Supervisor processes${NORMAL}\n"
+
+if [ -e $SUPERVISORCTL ]
+then
+  $SUPERVISORCTL status |
+    grep --color=always -E "FATAL|refused connection|$" | \
+    GREP_COLOR='01;33' grep --color=always -E "EXITED|$" | \
+    GREP_COLOR='01;32' grep --color=always -E "RUNNING|$"
+else
+    echo "No tox environment. Run make dev"
+fi
