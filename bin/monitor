@@ -12,6 +12,6 @@ nmap --datadir conf/ localhost | \
 
 echo "\n${BOLD}Docker containers${NORMAL}\n"
 
-docker ps -a --format "table {{.Names}}\\t{{.Image}}\\t{{.Status}}" | \
+docker ps --format "table {{.Names}}\\t{{.Image}}\\t{{.Status}}" | \
   grep --color=always -E "Exited|$" | \
   GREP_COLOR='01;32' grep --color=always -E "Up|$"
