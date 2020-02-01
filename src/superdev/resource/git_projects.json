@@ -17,5 +17,9 @@
     "via": {
         "git_url": "git@github.com:hypothesis/via.git",
         "tox_init": ["dev"]
+    },
+    "via3":  {
+        "git_url": "git@github.com:hypothesis/via3.git",
+        "tox_init": ["dev"]
     }
 }
