@@ -53,7 +53,7 @@ class Project:
         return status
 
     def _update_tox(self, status):
-        try:
+        try:  # pylint:disable=too-many-try-statements
             if self.tox_init:
                 for env in self.tox_init:
                     self._report(f"Initialising tox env '{env}'...")
